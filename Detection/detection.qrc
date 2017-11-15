@@ -1,0 +1,24 @@
+<RCC>
+    <qresource prefix="/Detection">
+        <file>Resources/1.png</file>
+        <file>Resources/2.png</file>
+        <file>Resources/3.png</file>
+        <file>Resources/4.png</file>
+        <file>Resources/5.png</file>
+        <file>Resources/6.png</file>
+        <file>Resources/7.png</file>
+        <file>Resources/8.png</file>
+        <file>Resources/9.png</file>
+        <file>Resources/10.png</file>
+        <file>Resources/11.png</file>
+        <file>Resources/12.png</file>
+        <file>Resources/13.png</file>
+        <file>Resources/14.png</file>
+        <file>Resources/15.png</file>
+        <file>Resources/play.png</file>
+        <file>Resources/bg.jpg</file>
+        <file>Resources/icon.png</file>
+        <file>Resources/OK.png</file>
+        <file>Resources/NG.png</file>
+    </qresource>
+</RCC>

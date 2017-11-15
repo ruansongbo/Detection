@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Template</class>
+ <widget class="QDialog" name="Template">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>509</width>
+    <height>414</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>模板设置</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="detection.qrc">
+    <normaloff>:/Detection/Resources/15.png</normaloff>:/Detection/Resources/15.png</iconset>
+  </property>
+  <widget class="QTableWidget" name="tableWidget">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>30</y>
+     <width>381</width>
+     <height>381</height>
+    </rect>
+   </property>
+   <row>
+    <property name="text">
+     <string>ROI[1]</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>ROI[2]</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>ROI[3]</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>ROI[4]</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>ROI[5]</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>ROI[6]</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>ROI[7]</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>ROI[8]</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>ROI[9]</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>ROI[10]</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>ROI[11]</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>ROI[12]</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>ROI[13]</string>
+    </property>
+   </row>
+   <column>
+    <property name="text">
+     <string>ROI类型</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>ROI位置</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>ROI大小</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>10</y>
+     <width>54</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>ROI列表</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>30</y>
+     <width>111</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>模板操作</string>
+   </property>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>导入模版</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_2">
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>130</y>
+     <width>111</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>ROI类型</string>
+   </property>
+   <widget class="QComboBox" name="comboBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>91</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>机柜棱边</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>印刷商标</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>螺丝铆钉</string>
+     </property>
+    </item>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_3">
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>230</y>
+     <width>111</width>
+     <height>161</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>ROI操作</string>
+   </property>
+   <widget class="QPushButton" name="pushButton_6">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>添加</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_4">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>90</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>缩小</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_5">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>120</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>撤销</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_3">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>60</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>放大</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <resources>
+  <include location="detection.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -1,0 +1,2 @@
+#include "MyQComboBox.h"
+QObject::connect(comboBox, SIGNAL(menuPopped()), Camera, SLOT(update_device()));
