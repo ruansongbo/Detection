@@ -105,6 +105,7 @@ void Camera::update_device()
 	InfoFramegrabber("GigEVision", "revision", &hv_RevInfo, &hv_RevValue);
 	InfoFramegrabber("GigEVision", "info_boards", &hv_Information, &hv_ValueList);
 	int i = 0;
+	DeviceBuf.clear();
 	for (i; i < hv_ValueList.Length(); i++)
 	{
 		QString temp = hv_ValueList[i].S().Text();
@@ -396,81 +397,235 @@ QImage Camera::getcameradata()
 QImage Camera::detection()
 {
 	// Local iconic variables
-	HObject  ho_ImageFFT, ho_ImageGauss;
-	HObject  ho_ImageConvol, ho_IlluminationImage, ho_ImageSub;
-	HObject  ho_ImageFilter, ho_EdgeAmplitude, ho_ROI_0, ho_TMP_Region;
-	HObject  ho_ImageReduced, ho_Edges, ho_RegionClosing, ho_ConnectedRegions;
-	HObject  ho_SelectedRegions, ho_ROI_Mark, ho_Template, ho_ImageMark;
-	HObject  ho_ImageAffinTrans, ho_ImageMark1, ho_Regions, ho_ImageResult;
+	HObject  ho_Template1, ho_Marker_ROI, ho_Displayer_ROI;
+	HObject  ho_UNION_Region, ho_Handle_ROI, ho_Hole_ROI, ho_Detect_ROI;
+	HObject  ho_Surf_ROI, ho_Marker_Image, ho_Displayer_Image;
+	HObject  ho_Handle_Image, ho_Hole_Image;
+	HObject  ho_Marker_ImageAffinTrans, ho_Defect_Marker_Image;
+	HObject  ho_Diff_Marker_Image, ho_Displayer_ImageAffinTrans;
+	HObject  ho_Defect_Displayer_Image, ho_Diff_Displayer_Image;
+	HObject  ho_Handle_ImageAffinTrans, ho_Defect_Handle_Image;
+	HObject  ho_Diff_Handle_Image, ho_Hole_ImageAffinTrans, ho_Defect_Hole_Image;
+	HObject  ho_Diff_Hole_Image, ho_Defect_Image, ho_ImageFFT;
+	HObject  ho_ImageGauss, ho_ImageConvol, ho_IlluminationImage;
+	HObject  ho_ImageSub, ho_ImageFilter, ho_EdgeAmplitude, ho_ImageInvert;
+	HObject  ho_ImageScaleMax, ho_Edges, ho_RegionClosing, ho_ConnectedRegions;
+	HObject  ho_SelectedRegions, ho_ImageCleared, ho_Regions1, ho_ImageResult;
 
 	// Local control variables
-	HTuple  hv_CameraParam, hv_DistortionCoeffs;
-	HTuple  hv_CarParamVirtualFixed, hv_Width, hv_Height, hv_Mark_Row;
-	HTuple  hv_Mark_Column, hv_Mark_Length1, hv_Mark_Lenght2;
-	HTuple  hv_Mark_Phi, hv_MarkID, hv_Row, hv_Column, hv_Angle;
-	HTuple  hv_Score, hv_HomMat2DIdentity, hv_HomMat2DTranslate;
-	HTuple  hv_HomMat2DRotate;
+	HTuple  hv_Marker_ROI_Row, hv_Marker_ROI_Column;
+	HTuple  hv_Marker_ROI_Length1, hv_Marker_ROI_Length2, hv_Displayer_ROI_Row;
+	HTuple  hv_Displayer_ROI_Column, hv_Displayer_ROI_Length1;
+	HTuple  hv_Displayer_ROI_Length2, hv_Handle_ROI_Row, hv_Handle_ROI_Column;
+	HTuple  hv_Handle_ROI_Length1, hv_Handle_ROI_Length2, hv_Hole_ROI_Row;
+	HTuple  hv_Hole_ROI_Column, hv_Hole_ROI_Length1, hv_Hole_ROI_Length2;
+	HTuple  hv_Marker_ID, hv_Displayer_ID, hv_Handle_ID, hv_Hole_ID;
+	HTuple  hv_RowsF, hv_ColsF, hv_CoRRJunctions;
+	HTuple  hv_CoRCJunctions, hv_CoCCJunctions, hv_RowArea;
+	HTuple  hv_ColumnArea, hv_CoRRArea, hv_CoRCArea, hv_CoCCArea;
+	HTuple  hv_RowsT, hv_ColsT, hv_CoRRJunctions1, hv_CoRCJunctions1;
+	HTuple  hv_CoCCJunctions1, hv_RowArea1, hv_ColumnArea1;
+	HTuple  hv_CoRRArea1, hv_CoRCArea1, hv_CoCCArea1, hv_HomMat2D;
+	HTuple  hv_Points1, hv_Points2, hv_Marker_Row, hv_Marker_Column;
+	HTuple  hv_Marker_Angle, hv_Marker_Score, hv_Marker_HomMat2DIdentity;
+	HTuple  hv_Marker_HomMat2DTranslate, hv_Marker_HomMat2DRotate;
+	HTuple  hv_Displayer_Row, hv_Displayer_Column, hv_Displayer_Angle;
+	HTuple  hv_Displayer_Score, hv_Displayer_HomMat2DIdentity;
+	HTuple  hv_Displayer_HomMat2DTranslate, hv_Displayer_HomMat2DRotate;
+	HTuple  hv_Handle_Row, hv_Handle_Column, hv_Handle_Angle;
+	HTuple  hv_Handle_Score, hv_Handle_HomMat2DIdentity, hv_Handle_HomMat2DTranslate;
+	HTuple  hv_Handle_HomMat2DRotate, hv_Hole_Row, hv_Hole_Column;
+	HTuple  hv_Hole_Angle, hv_Hole_Score, hv_Hole_HomMat2DIdentity;
+	HTuple  hv_Hole_HomMat2DTranslate, hv_Hole_HomMat2DRotate;
+	HTuple  hv_Width, hv_Height, hv_GNum, hv_RNum;
+
+	ReadImage(&ho_Template1, "C:/Users/Administrator/Desktop/UpTemplate.png");
+
+	hv_Marker_ROI_Row = 1961;
+	hv_Marker_ROI_Column = 776;
+	hv_Marker_ROI_Length1 = 107;
+	hv_Marker_ROI_Length2 = 64;
+	GenRectangle2(&ho_Marker_ROI, 1961, 776, HTuple(-0).TupleRad(), 107, 64);
+
+	hv_Displayer_ROI_Row = 2920;
+	hv_Displayer_ROI_Column = 1380;
+	hv_Displayer_ROI_Length1 = 183;
+	hv_Displayer_ROI_Length2 = 90;
+	GenRectangle2(&ho_Displayer_ROI, 2920, 1380, HTuple(-0).TupleRad(), 183, 90);
+	Union2(ho_Marker_ROI, ho_Displayer_ROI, &ho_UNION_Region);
+
+	hv_Handle_ROI_Row = 2678;
+	hv_Handle_ROI_Column = 2239;
+	hv_Handle_ROI_Length1 = 47;
+	hv_Handle_ROI_Length2 = 85;
+	GenRectangle2(&ho_Handle_ROI, 2678, 2239, HTuple(-0).TupleRad(), 47, 85);
+	Union2(ho_Handle_ROI, ho_UNION_Region, &ho_UNION_Region);
+
+	hv_Hole_ROI_Row = 2922;
+	hv_Hole_ROI_Column = 876;
+	hv_Hole_ROI_Length1 = 19;
+	hv_Hole_ROI_Length2 = 19;
+	GenRectangle2(&ho_Hole_ROI, 2922, 876, HTuple(-0).TupleRad(), 19, 19);
+	Union2(ho_Hole_ROI, ho_UNION_Region, &ho_UNION_Region);
+
+	Complement(ho_UNION_Region, &ho_Detect_ROI);
+	GenRectangle1(&ho_Surf_ROI, 1837.09, 509.775, 3495.59, 2263.62);
+	Intersection(ho_Surf_ROI, ho_Detect_ROI, &ho_Detect_ROI);
+
+	ReduceDomain(ho_Template1, ho_Marker_ROI, &ho_Marker_Image);
+	CreateShapeModel(ho_Marker_Image, 10, -(HTuple(0).TupleRad()), HTuple(360).TupleRad(),
+		"auto", "no_pregeneration", "ignore_local_polarity", 40, 10, &hv_Marker_ID);
+
+	ReduceDomain(ho_Template1, ho_Displayer_ROI, &ho_Displayer_Image);
+	CreateShapeModel(ho_Displayer_Image, 10, -(HTuple(0).TupleRad()), HTuple(360).TupleRad(),
+		"auto", "no_pregeneration", "ignore_local_polarity", 40, 10, &hv_Displayer_ID);
+
+	ReduceDomain(ho_Template1, ho_Handle_ROI, &ho_Handle_Image);
+	CreateShapeModel(ho_Handle_Image, 10, -(HTuple(0).TupleRad()), HTuple(360).TupleRad(),
+		"auto", "no_pregeneration", "ignore_local_polarity", 40, 10, &hv_Handle_ID);
+
+	ReduceDomain(ho_Template1, ho_Hole_ROI, &ho_Hole_Image);
+	CreateShapeModel(ho_Hole_Image, 10, -(HTuple(1).TupleRad()), HTuple(1).TupleRad(),
+		"auto", "no_pregeneration", "ignore_local_polarity", 40, 10, &hv_Hole_ID);
+
 	GrabImage(&ho_Image, hv_AcqHandle);
 	MapImage(ho_Image, ho_Map, &cal_Image);
 	RotateImage(cal_Image, &ho_Image, -90, "constant");
-	//write_image (Image, 'png', 0, 'C:/Users/Administrator/Desktop/result2.png')
-	GetImageSize(ho_Image, &hv_Width, &hv_Height);
-	RftGeneric(ho_Image, &ho_ImageFFT, "to_freq", "none", "complex", hv_Width);
+	PointsFoerstner(ho_Image, 1, 2, 3, 50, 0.1, "gauss", "true", &hv_RowsF, &hv_ColsF,
+		&hv_CoRRJunctions, &hv_CoRCJunctions, &hv_CoCCJunctions, &hv_RowArea, &hv_ColumnArea,
+		&hv_CoRRArea, &hv_CoRCArea, &hv_CoCCArea);
+	PointsFoerstner(ho_Template1, 1, 2, 3, 50, 0.1, "gauss", "true", &hv_RowsT, &hv_ColsT,
+		&hv_CoRRJunctions1, &hv_CoRCJunctions1, &hv_CoCCJunctions1, &hv_RowArea1,
+		&hv_ColumnArea1, &hv_CoRRArea1, &hv_CoRCArea1, &hv_CoCCArea1);
+	ProjMatchPointsRansac(ho_Image, ho_Template1, hv_RowsF, hv_ColsF, hv_RowsT,
+		hv_ColsT, "ncc", 10, 0, 0, 648, 968, HTuple(HTuple(-10).TupleRad()).TupleConcat(HTuple(40).TupleRad()),
+		0.5, "gold_standard", 10, 42, &hv_HomMat2D, &hv_Points1, &hv_Points2);
+	ProjectiveTransImage(ho_Image, &ho_Image, hv_HomMat2D, "bilinear", "false",
+		"false");
+
+	FindShapeModel(ho_Image, hv_Marker_ID, HTuple(-5).TupleRad(), HTuple(5).TupleRad(),
+		0.5, 1, 0.5, "least_squares_high", 8, 0.9, &hv_Marker_Row, &hv_Marker_Column,
+		&hv_Marker_Angle, &hv_Marker_Score);
+	HomMat2dIdentity(&hv_Marker_HomMat2DIdentity);
+	HomMat2dTranslate(hv_Marker_HomMat2DIdentity, hv_Marker_ROI_Row - hv_Marker_Row,
+		hv_Marker_ROI_Column - hv_Marker_Column, &hv_Marker_HomMat2DTranslate);
+	HomMat2dRotate(hv_Marker_HomMat2DTranslate, -hv_Marker_Angle, hv_Marker_ROI_Row,
+		hv_Marker_ROI_Column, &hv_Marker_HomMat2DRotate);
+	AffineTransImage(ho_Image, &ho_Marker_ImageAffinTrans, hv_Marker_HomMat2DRotate,
+		"constant", "false");
+	ReduceDomain(ho_Marker_ImageAffinTrans, ho_Marker_ROI, &ho_Defect_Marker_Image
+	);
+	AbsDiffImage(ho_Marker_Image, ho_Defect_Marker_Image, &ho_Diff_Marker_Image,
+		1);
+	InvertImage(ho_Diff_Marker_Image, &ho_Diff_Marker_Image);
+
+	FindShapeModel(ho_Image, hv_Displayer_ID, HTuple(-5).TupleRad(), HTuple(5).TupleRad(),
+		0.5, 1, 0.5, "least_squares_high", 8, 0.9, &hv_Displayer_Row, &hv_Displayer_Column,
+		&hv_Displayer_Angle, &hv_Displayer_Score);
+	HomMat2dIdentity(&hv_Displayer_HomMat2DIdentity);
+	HomMat2dTranslate(hv_Displayer_HomMat2DIdentity, hv_Displayer_ROI_Row - hv_Displayer_Row,
+		hv_Displayer_ROI_Column - hv_Displayer_Column, &hv_Displayer_HomMat2DTranslate);
+	HomMat2dRotate(hv_Displayer_HomMat2DTranslate, -hv_Displayer_Angle, hv_Displayer_ROI_Row,
+		hv_Displayer_ROI_Column, &hv_Displayer_HomMat2DRotate);
+	AffineTransImage(ho_Image, &ho_Displayer_ImageAffinTrans, hv_Displayer_HomMat2DRotate,
+		"constant", "false");
+	ReduceDomain(ho_Displayer_ImageAffinTrans, ho_Displayer_ROI, &ho_Defect_Displayer_Image
+	);
+	AbsDiffImage(ho_Displayer_Image, ho_Defect_Displayer_Image, &ho_Diff_Displayer_Image,
+		1);
+	InvertImage(ho_Diff_Displayer_Image, &ho_Diff_Displayer_Image);
+
+	FindShapeModel(ho_Image, hv_Handle_ID, HTuple(-5).TupleRad(), HTuple(5).TupleRad(),
+		0.5, 1, 0.5, "least_squares_high", 8, 0.9, &hv_Handle_Row, &hv_Handle_Column,
+		&hv_Handle_Angle, &hv_Handle_Score);
+	HomMat2dIdentity(&hv_Handle_HomMat2DIdentity);
+	HomMat2dTranslate(hv_Handle_HomMat2DIdentity, hv_Handle_ROI_Row - hv_Handle_Row,
+		hv_Handle_ROI_Column - hv_Handle_Column, &hv_Handle_HomMat2DTranslate);
+	HomMat2dRotate(hv_Handle_HomMat2DTranslate, -hv_Handle_Angle, hv_Handle_ROI_Row,
+		hv_Handle_ROI_Column, &hv_Handle_HomMat2DRotate);
+	AffineTransImage(ho_Image, &ho_Handle_ImageAffinTrans, hv_Handle_HomMat2DRotate,
+		"constant", "false");
+	ReduceDomain(ho_Handle_ImageAffinTrans, ho_Handle_ROI, &ho_Defect_Handle_Image
+	);
+	AbsDiffImage(ho_Handle_Image, ho_Defect_Handle_Image, &ho_Diff_Handle_Image,
+		1);
+	InvertImage(ho_Diff_Handle_Image, &ho_Diff_Handle_Image);
+
+	FindShapeModel(ho_Image, hv_Hole_ID, HTuple(-1).TupleRad(), HTuple(1).TupleRad(),
+		0.5, 1, 0.5, "least_squares_high", 8, 0.9, &hv_Hole_Row, &hv_Hole_Column,
+		&hv_Hole_Angle, &hv_Hole_Score);
+	HomMat2dIdentity(&hv_Hole_HomMat2DIdentity);
+	HomMat2dTranslate(hv_Hole_HomMat2DIdentity, hv_Hole_ROI_Row - hv_Hole_Row, hv_Hole_ROI_Column - hv_Hole_Column,
+		&hv_Hole_HomMat2DTranslate);
+	HomMat2dRotate(hv_Hole_HomMat2DTranslate, -hv_Hole_Angle, hv_Hole_ROI_Row, hv_Hole_ROI_Column,
+		&hv_Hole_HomMat2DRotate);
+	AffineTransImage(ho_Image, &ho_Hole_ImageAffinTrans, hv_Hole_HomMat2DRotate,
+		"constant", "false");
+	ReduceDomain(ho_Hole_ImageAffinTrans, ho_Hole_ROI, &ho_Defect_Hole_Image);
+	AbsDiffImage(ho_Hole_Image, ho_Defect_Hole_Image, &ho_Diff_Hole_Image, 1);
+	InvertImage(ho_Diff_Hole_Image, &ho_Diff_Hole_Image);
+
+	ReduceDomain(ho_Image, ho_Detect_ROI, &ho_Defect_Image);
+	GetImageSize(ho_Defect_Image, &hv_Width, &hv_Height);
+	RftGeneric(ho_Defect_Image, &ho_ImageFFT, "to_freq", "none", "complex", hv_Width);
 	GenGaussFilter(&ho_ImageGauss, 300, 300, 0, "n", "rft", hv_Width, hv_Height);
 	ConvolFft(ho_ImageFFT, ho_ImageGauss, &ho_ImageConvol);
 	RftGeneric(ho_ImageConvol, &ho_IlluminationImage, "from_freq", "none", "byte",
 		hv_Width);
-	SubImage(ho_Image, ho_IlluminationImage, &ho_ImageSub, 2, 100);
+	SubImage(ho_Defect_Image, ho_IlluminationImage, &ho_ImageSub, 2, 100);
 	MeanImage(ho_ImageSub, &ho_ImageFilter, 9, 9);
-	SobelAmp(ho_Image, &ho_EdgeAmplitude, "sum_abs", 5);
-	GenRectangle1(&ho_ROI_0, 574.827, 699.36, 722.904, 935.618);
-	GenRectangle1(&ho_TMP_Region, 1503.31, 863.539, 1579.35, 935.618);
-	Union2(ho_ROI_0, ho_TMP_Region, &ho_ROI_0);
-	GenRectangle1(&ho_TMP_Region, 1447.28, 1207.91, 1627.38, 1552.29);
-	Union2(ho_ROI_0, ho_TMP_Region, &ho_ROI_0);
-	GenRectangle2(&ho_TMP_Region, 1307.84, 2188.14, HTuple(-1.59084).TupleRad(), 35.623, 77.9685);
-
-	Union2(ho_ROI_0, ho_TMP_Region, &ho_ROI_0);
-	GenRectangle2(&ho_TMP_Region, 1295.5, 1399.5, HTuple(-0.834346).TupleRad(), 824.087,
-		764.699);
-	SymmDifference(ho_ROI_0, ho_TMP_Region, &ho_ROI_0);
-	ReduceDomain(ho_EdgeAmplitude, ho_ROI_0, &ho_ImageReduced);
-	Threshold(ho_ImageReduced, &ho_Edges, 11, 255);
+	SobelAmp(ho_Defect_Image, &ho_EdgeAmplitude, "sum_abs", 5);
+	InvertImage(ho_EdgeAmplitude, &ho_ImageInvert);
+	ScaleImageMax(ho_ImageInvert, &ho_ImageScaleMax);
+	Threshold(ho_EdgeAmplitude, &ho_Edges, 11, 255);
 	ClosingRectangle1(ho_Edges, &ho_RegionClosing, 3, 3);
 	Connection(ho_RegionClosing, &ho_ConnectedRegions);
 	SelectShape(ho_ConnectedRegions, &ho_SelectedRegions, "area", "and", 15, 316792);
-	hv_Mark_Row = 641.696;
-	hv_Mark_Column = 821.691;
-	hv_Mark_Length1 = 118.086;
-	hv_Mark_Lenght2 = 69.8857;
-	hv_Mark_Phi = HTuple(0).TupleRad();
-	GenRectangle2(&ho_ROI_Mark, hv_Mark_Row, hv_Mark_Column, hv_Mark_Phi, hv_Mark_Length1,
-		hv_Mark_Lenght2);
-	ReadImage(&ho_Template, "Template1.png");
-	//read_image (Image, 'C:/Users/Administrator/Desktop/result2_cal.png')
-	//RotateImage(ho_Image, &ho_Image, 10, "constant");
-	ReduceDomain(ho_Template, ho_ROI_Mark, &ho_ImageMark);
-	CreateShapeModel(ho_ImageMark, 10, -(HTuple(0).TupleRad()), HTuple(360).TupleRad(),
-		"auto", "no_pregeneration", "ignore_local_polarity", 40, 10, &hv_MarkID);
-	FindShapeModel(ho_Image, hv_MarkID, -(HTuple(0).TupleRad()), HTuple(360).TupleRad(),
-		0.5, 1, 0.5, "least_squares_high", 8, 0.9, &hv_Row, &hv_Column, &hv_Angle,
-		&hv_Score);
-	HomMat2dIdentity(&hv_HomMat2DIdentity);
-	HomMat2dTranslate(hv_HomMat2DIdentity, hv_Row - hv_Mark_Row, hv_Column - hv_Mark_Column,
-		&hv_HomMat2DTranslate);
-	HomMat2dRotate(hv_HomMat2DTranslate, -hv_Angle, hv_Mark_Row, hv_Mark_Column,
-		&hv_HomMat2DRotate);
-	AffineTransImage(ho_Image, &ho_ImageAffinTrans, hv_HomMat2DRotate, "constant",
-		"false");
-	ReduceDomain(ho_ImageAffinTrans, ho_ROI_Mark, &ho_ImageMark1);
-	AbsDiffImage(ho_ImageMark1, ho_ImageMark, &ho_ImageSub, 1);
-	Threshold(ho_ImageSub, &ho_Regions, 81, 255);
-	PaintRegion(ho_Regions, ho_Image, &ho_ImageResult, 255, "fill");
+	FillUp(ho_SelectedRegions, &ho_SelectedRegions);
+
+	GenImageProto(ho_Image, &ho_ImageCleared, 255);
+	OverpaintGray(ho_ImageCleared, ho_Diff_Displayer_Image);
+	OverpaintGray(ho_ImageCleared, ho_Diff_Marker_Image);
+	OverpaintGray(ho_ImageCleared, ho_Diff_Handle_Image);
+	OverpaintGray(ho_ImageCleared, ho_Diff_Hole_Image);
+	Threshold(ho_ImageCleared, &ho_Regions1, 13, 215);
+	DilationRectangle1(ho_Regions1, &ho_Regions1, 2, 7);
+	ErosionRectangle1(ho_Regions1, &ho_Regions1, 2, 7);
+	Connection(ho_Regions1, &ho_Regions1);
+	SelectShape(ho_Regions1, &ho_Regions1, "height", "and", 0, 70);
+	SelectShape(ho_Regions1, &ho_Regions1, "area", "and", 50.33, 1000);
+	//CountObj(ho_Regions1, &hv_GNum);
+	//CountObj(ho_SelectedRegions, &hv_RNum);
+	//if (0 != (hv_GNum != 0))
+	//{
+	//	if (0 != (hv_RNum != 0))
+	//	{
+	//		PaintRegion(ho_Regions1, ho_Image, &ho_ImageResult, 255, "fill");
+	//		PaintRegion(ho_SelectedRegions, ho_ImageResult, &ho_ImageResult, 255, "fill");
+	//	}
+	//	else
+	//	{
+	//		PaintRegion(ho_Regions1, ho_Image, &ho_ImageResult, 255, "fill");
+	//	}
+	//}
+	//else
+	//{
+	//	if (0 != (hv_RNum != 0))
+	//	{
+	//		PaintRegion(ho_SelectedRegions, ho_Image, &ho_ImageResult, 255, "fill");
+	//	}
+	//	else
+	//	{
+	//		ho_ImageResult = ho_Image;
+	//	}
+	//}
+	PaintRegion(ho_Regions1, ho_Image, &ho_ImageResult, 255, "fill");
 	PaintRegion(ho_SelectedRegions, ho_ImageResult, &ho_ImageResult, 255, "fill");
 	QString filename = QString("C:/Users/Administrator/Desktop/result%1.png").arg(index);
 	WriteImage(ho_ImageResult, "png", 0, filename.toStdString().data());
-
 	index++;
-	QImage Image = Hobject2QImage(ho_ImageResult);
+	QImage Image;
+	Image.load(filename.toStdString().data());
+	//QImage Image = Hobject2QImage(ho_ImageResult);
 	return Image;
 }

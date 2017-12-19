@@ -29,10 +29,10 @@ class Ui_Camera
 {
 public:
     QGroupBox *groupBox;
-	MyQComboBox *comboBox;
+    MyQComboBox *comboBox;
     QLabel *label_6;
     QLabel *label_7;
-	MyQComboBox *comboBox_2;
+    MyQComboBox *comboBox_2;
     QLabel *label_8;
     QLabel *label_9;
     QLabel *label_10;

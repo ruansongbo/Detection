@@ -1,0 +1,2 @@
+Detection.sdf filter=lfs diff=lfs merge=lfs -text
+*.sdf filter=lfs diff=lfs merge=lfs -text

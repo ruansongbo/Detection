@@ -44,6 +44,7 @@ QImage Hobject2QImage(HObject hobject)
 				data = image.scanLine(i);
 				for (int j = 0; j<hv_Width.I(); j++)
 				{
+					int as = hv_Width.I();
 					data[j] = p[i*hv_Width.I() + j];
 				}
 			}
