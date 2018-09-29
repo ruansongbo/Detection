@@ -397,9 +397,9 @@ QImage Camera::getcameradata()
 QImage Camera::detection()
 {
 	// Local iconic variables
-	HObject  ho_Template1, ho_Marker_ROI, ho_Displayer_ROI;
+	HObject  ho_Template1, ho_Marker_ROI, ho_Displayer_ROI, test_image;
 	HObject  ho_UNION_Region, ho_Handle_ROI, ho_Hole_ROI, ho_Detect_ROI;
-	HObject  ho_Surf_ROI, ho_Marker_Image, ho_Displayer_Image;
+	HObject  ho_Surf_ROI, ho_Marker_Image, ho_Displayer_Image, ho_Pre_ROI;
 	HObject  ho_Handle_Image, ho_Hole_Image;
 	HObject  ho_Marker_ImageAffinTrans, ho_Defect_Marker_Image;
 	HObject  ho_Diff_Marker_Image, ho_Displayer_ImageAffinTrans;
@@ -439,7 +439,7 @@ QImage Camera::detection()
 	HTuple  hv_Hole_HomMat2DTranslate, hv_Hole_HomMat2DRotate;
 	HTuple  hv_Width, hv_Height, hv_GNum, hv_RNum;
 
-	ReadImage(&ho_Template1, "C:/Users/Administrator/Desktop/UpTemplate.png");
+	ReadImage(&ho_Template1, "UpTemplate.png");
 
 	hv_Marker_ROI_Row = 1961;
 	hv_Marker_ROI_Column = 776;
@@ -491,18 +491,20 @@ QImage Camera::detection()
 	GrabImage(&ho_Image, hv_AcqHandle);
 	MapImage(ho_Image, ho_Map, &cal_Image);
 	RotateImage(cal_Image, &ho_Image, -90, "constant");
-	PointsFoerstner(ho_Image, 1, 2, 3, 50, 0.1, "gauss", "true", &hv_RowsF, &hv_ColsF,
+
+	GenRectangle1(&ho_Pre_ROI, 1487.5, 199.5, 3835.5, 2523.5);
+	ReduceDomain(ho_Image, ho_Pre_ROI, &test_image);
+	PointsFoerstner(test_image, 1, 2, 3, 50, 0.1, "gauss", "true", &hv_RowsF, &hv_ColsF,
 		&hv_CoRRJunctions, &hv_CoRCJunctions, &hv_CoCCJunctions, &hv_RowArea, &hv_ColumnArea,
 		&hv_CoRRArea, &hv_CoRCArea, &hv_CoCCArea);
 	PointsFoerstner(ho_Template1, 1, 2, 3, 50, 0.1, "gauss", "true", &hv_RowsT, &hv_ColsT,
 		&hv_CoRRJunctions1, &hv_CoRCJunctions1, &hv_CoCCJunctions1, &hv_RowArea1,
 		&hv_ColumnArea1, &hv_CoRRArea1, &hv_CoRCArea1, &hv_CoCCArea1);
-	ProjMatchPointsRansac(ho_Image, ho_Template1, hv_RowsF, hv_ColsF, hv_RowsT,
+	ProjMatchPointsRansac(test_image, ho_Template1, hv_RowsF, hv_ColsF, hv_RowsT,
 		hv_ColsT, "ncc", 10, 0, 0, 648, 968, HTuple(HTuple(-10).TupleRad()).TupleConcat(HTuple(40).TupleRad()),
 		0.5, "gold_standard", 10, 42, &hv_HomMat2D, &hv_Points1, &hv_Points2);
 	ProjectiveTransImage(ho_Image, &ho_Image, hv_HomMat2D, "bilinear", "false",
 		"false");
-
 	FindShapeModel(ho_Image, hv_Marker_ID, HTuple(-5).TupleRad(), HTuple(5).TupleRad(),
 		0.5, 1, 0.5, "least_squares_high", 8, 0.9, &hv_Marker_Row, &hv_Marker_Column,
 		&hv_Marker_Angle, &hv_Marker_Score);
@@ -587,7 +589,7 @@ QImage Camera::detection()
 	OverpaintGray(ho_ImageCleared, ho_Diff_Displayer_Image);
 	OverpaintGray(ho_ImageCleared, ho_Diff_Marker_Image);
 	OverpaintGray(ho_ImageCleared, ho_Diff_Handle_Image);
-	OverpaintGray(ho_ImageCleared, ho_Diff_Hole_Image);
+	//OverpaintGray(ho_ImageCleared, ho_Diff_Hole_Image);
 	Threshold(ho_ImageCleared, &ho_Regions1, 13, 215);
 	DilationRectangle1(ho_Regions1, &ho_Regions1, 2, 7);
 	ErosionRectangle1(ho_Regions1, &ho_Regions1, 2, 7);
@@ -619,8 +621,8 @@ QImage Camera::detection()
 	//		ho_ImageResult = ho_Image;
 	//	}
 	//}
-	PaintRegion(ho_Regions1, ho_Image, &ho_ImageResult, 255, "fill");
-	PaintRegion(ho_SelectedRegions, ho_ImageResult, &ho_ImageResult, 255, "fill");
+	PaintRegion(ho_SelectedRegions, ho_Image, &ho_ImageResult, 255, "fill");
+	//PaintRegion(ho_Regions1, ho_ImageResult, &ho_ImageResult, 255, "fill");
 	QString filename = QString("C:/Users/Administrator/Desktop/result%1.png").arg(index);
 	WriteImage(ho_ImageResult, "png", 0, filename.toStdString().data());
 	index++;

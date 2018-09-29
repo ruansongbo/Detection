@@ -85,12 +85,12 @@
     </property>
     <item>
      <property name="text">
-      <string>Division</string>
+      <string>Polynomial</string>
      </property>
     </item>
     <item>
      <property name="text">
-      <string>Polynomial</string>
+      <string>Division</string>
      </property>
     </item>
    </widget>

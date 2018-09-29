@@ -22,7 +22,7 @@ Detection::Detection(QWidget *parent)
 	//paint->begin(this);
 	OK.load("./Resources/OK.png"); //"C:/Users/bb/Desktop/test.jpg");
 	NG.load("./Resources/NG.png");
-	Template.load("C:/Users/Administrator/Desktop/Template.png");
+	Template.load("UpTemplate.png");
 	QImage OKImg = OK.scaled(ui.masterlabel->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 	QImage NGImg = NG.scaled(ui.masterlabel->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 	QImage OKImg1 = OK.scaled(ui.resultlabel->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
